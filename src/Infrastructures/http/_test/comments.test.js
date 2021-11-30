@@ -38,7 +38,6 @@ describe('endpoint /threads/{threadid}/comments', () => {
       });
 
       const responseJson = JSON.parse(response.payload);
-      console.log(responseJson);
       expect(response.statusCode).toEqual(201);
       expect(responseJson.status).toEqual('success');
       expect(responseJson.data.addedComment).toBeDefined();
@@ -89,6 +88,22 @@ describe('endpoint /threads/{threadid}/comments', () => {
       expect(responseJson.status).toEqual('fail');
     });
     it('should response 400 when bad payload', async () => {
+      const accessToken = await ServerTestHelper.getAccessToken();
+      const server = await createServer(container);
+      await ThreadsTableTestHelper.addThread({ id: 'thread-2' });
+      const response = await server.inject({
+        url: '/threads/thread-2/comments',
+        method: 'POST',
+        payload: {},
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(400);
+      expect(responseJson.status).toEqual('fail');
+    });
+    it('should response 400 when bad payload', async () => {
       const payload = {
         content: 123,
       };
@@ -103,9 +118,77 @@ describe('endpoint /threads/{threadid}/comments', () => {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-
       const responseJson = JSON.parse(response.payload);
       expect(response.statusCode).toEqual(400);
+      expect(responseJson.status).toEqual('fail');
+    });
+  });
+  describe('when DELETE /threads/{threadid}/comments/{commentid}', () => {
+    it('should response 401 when not authorize', async () => {
+      const useCasePayload = {
+        thread: 'thread-123',
+        comment: 'comment-123',
+      };
+      await ThreadsTableTestHelper.addThread({ id: useCasePayload.thread });
+      await CommentsTableTestHelper.addComment({ id: useCasePayload.comment });
+      const server = await createServer(container);
+      const response = await server.inject({
+        url: '/threads/thread-123/comments/commen-123',
+        method: 'DELETE',
+      });
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(401);
+      expect(responseJson.message).toEqual('Missing authentication');
+    });
+    it('should response 404 when comment not found', async () => {
+      const useCasePayload = {
+        thread: 'thread-123',
+        comment: 'comment-123',
+      };
+      const accessToken = await ServerTestHelper.getAccessToken();
+      await ThreadsTableTestHelper.addThread({
+        id: useCasePayload.thread,
+      });
+      await CommentsTableTestHelper.addComment({
+        id: useCasePayload.comment,
+      });
+      const server = await createServer(container);
+      const response = await server.inject({
+        url: '/threads/thread-123/comments/commen-12',
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(404);
+      expect(responseJson.status).toEqual('fail');
+    });
+    it('should response 403 when user delete another user comment', async () => {
+      const useCasePayload = {
+        owner: 'user-12',
+        thread: 'thread-123',
+        comment: 'comment-123',
+      };
+      const accessToken = await ServerTestHelper.getAccessToken();
+      await ThreadsTableTestHelper.addThread({
+        id: useCasePayload.thread,
+        owner: useCasePayload.owner,
+      });
+      await CommentsTableTestHelper.addComment({
+        id: useCasePayload.comment,
+        owner: useCasePayload.owner,
+      });
+      const server = await createServer(container);
+      const response = await server.inject({
+        url: '/threads/thread-123/comments/comment-123',
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(403);
       expect(responseJson.status).toEqual('fail');
     });
   });

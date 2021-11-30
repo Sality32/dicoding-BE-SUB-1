@@ -18,6 +18,10 @@ exports.up = (pgm) => {
       type: 'VARCHAR(50)',
       notNull: true,
     },
+    date: {
+      type: 'DATE',
+      notNull: true,
+    },
   });
 };
 
