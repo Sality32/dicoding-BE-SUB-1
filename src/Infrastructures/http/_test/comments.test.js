@@ -191,5 +191,32 @@ describe('endpoint /threads/{threadid}/comments', () => {
       expect(response.statusCode).toEqual(403);
       expect(responseJson.status).toEqual('fail');
     });
+    it('should response 200', async () => {
+      const useCasePayload = {
+        owner: 'user-123',
+        thread: 'thread-123',
+        comment: 'comment-123',
+      };
+      const accessToken = await ServerTestHelper.getAccessToken();
+      await ThreadsTableTestHelper.addThread({
+        id: useCasePayload.thread,
+        owner: useCasePayload.owner,
+      });
+      await CommentsTableTestHelper.addComment({
+        id: useCasePayload.comment,
+        owner: useCasePayload.owner,
+      });
+      const server = await createServer(container);
+      const response = await server.inject({
+        url: '/threads/thread-123/comments/comment-123',
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(200);
+      expect(responseJson.status).toEqual('success');
+    });
   });
 });

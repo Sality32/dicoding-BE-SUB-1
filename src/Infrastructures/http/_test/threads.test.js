@@ -1,6 +1,7 @@
 const CommentsTableTestHelper = require('../../../../tests/CommentTableTestHelper');
 const ServerTestHelper = require('../../../../tests/ServerTestHelper');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
+const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const container = require('../../container');
 const pool = require('../../database/postgres/pool');
 const createServer = require('../createServer');
@@ -13,6 +14,7 @@ describe('/threads endpoint', () => {
   afterEach(async () => {
     await ThreadsTableTestHelper.cleanTable();
     await CommentsTableTestHelper.cleanTable();
+    await UsersTableTestHelper.cleanTable();
   });
 
   describe('when POST /threads', () => {
@@ -76,6 +78,78 @@ describe('/threads endpoint', () => {
       const responseJson = JSON.parse(response.payload);
       expect(response.statusCode).toEqual(401);
       expect(responseJson.message).toEqual('Missing authentication');
+    });
+  });
+  describe('when GET /thread/{threadid}', () => {
+    it('should return 404 when thread not found', async () => {
+      const server = await createServer(container);
+
+      const response = await server.inject({
+        url: '/threads/thread-9',
+        method: 'GET',
+      });
+
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(404);
+      expect(responseJson.status).toEqual('fail');
+    });
+    it('should return 200 when thread exist', async () => {
+      const datetime = new Date().toISOString();
+      const payload = {
+        id: 'thread-123',
+        title: ' ini tittle',
+        body: 'ini body',
+        owner: 'user-321',
+        date: datetime,
+      };
+
+      const userPayload = [
+        {
+          id: 'user-123',
+          username: 'jhondoe',
+        },
+        {
+          id: 'user-321',
+          username: 'dicoding',
+        },
+      ];
+
+      const commentPayload = [
+        {
+          id: 'comment-123',
+          owner: 'user-123',
+          content: 'sebuah comment',
+          thread: 'thread-123',
+          isdelete: false,
+          date: datetime,
+        },
+        {
+          id: 'comment-321',
+          owner: 'user-321',
+          thread: 'thread-123',
+          content: 'sebuah comment',
+          isdelete: true,
+          date: datetime,
+        },
+      ];
+      await UsersTableTestHelper.addUser(userPayload[0]);
+      await UsersTableTestHelper.addUser(userPayload[1]);
+      await ThreadsTableTestHelper.addThread(payload);
+      await CommentsTableTestHelper.addComment(commentPayload[0]);
+      await CommentsTableTestHelper.addComment(commentPayload[1]);
+
+      const server = await createServer(container);
+      const response = await server.inject({
+        url: '/threads/thread-123',
+        method: 'GET',
+      });
+
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(200);
+      expect(responseJson.status).toEqual('success');
+      expect(responseJson.data.thread).toBeDefined();
+      expect(responseJson.data.thread.id).toEqual(payload.id);
+      expect(responseJson.data.thread.title).toEqual(payload.title);
     });
   });
 });

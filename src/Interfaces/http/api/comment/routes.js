@@ -15,6 +15,7 @@ const routes = (handler) => [
       auth: 'thread_jwt',
     },
   },
+
 ];
 
 module.exports = routes;
