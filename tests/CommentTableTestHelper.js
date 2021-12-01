@@ -7,10 +7,12 @@ const CommentsTableTestHelper = {
     content = 'ini content',
     thread = 'thread-123',
     owner = 'user-123',
+    isdelete = false,
+    date = new Date().toISOString(),
   }) {
     const query = {
-      text: 'INSERT INTO comments VALUES($1, $2, $3, $4)',
-      values: [id, content, thread, owner],
+      text: 'INSERT INTO comments VALUES($1, $2, $3, $4, $5, $6)',
+      values: [id, content, thread, owner, date, isdelete],
     };
     await pool.query(query);
   },
@@ -25,6 +27,15 @@ const CommentsTableTestHelper = {
   },
   async cleanTable() {
     await pool.query('DELETE FROM comments WHERE 1=1');
+  },
+  async findCommentDeletedById(id) {
+    const is_delete = true;
+    const query = {
+      text: 'SELECT * FROM comments WHERE id = $1 AND is_delete=$2',
+      values: [id, is_delete],
+    };
+    const result = await pool.query(query);
+    return result.rows;
   },
 };
 
