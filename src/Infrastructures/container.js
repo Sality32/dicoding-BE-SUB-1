@@ -230,19 +230,24 @@ container.register([
         },
       ],
     },
-  },{
+  },
+  {
     key: GetThreadUseCase.name,
     Class: GetThreadUseCase,
-    parameter:{
+    parameter: {
       injectType: 'destructuring',
-      dependencies:[
+      dependencies: [
         {
           name: 'threadRepository',
-          internal: ThreadRepository.name
-        }
-      ]
-    }
-  }
+          internal: ThreadRepository.name,
+        },
+        {
+          name: 'commentRepository',
+          internal: CommentRepository.name,
+        },
+      ],
+    },
+  },
 ]);
 
 module.exports = container;

@@ -40,5 +40,16 @@ class CommentRepositoryPostgres extends CommentRepository {
       throw new ForbiddenError('tidak bisa menghapus comment dari user lain');
     }
   }
+  async getCommentByThreadId(threadId) {
+    const query = {
+      text: `SELECT comments.id, comments.date, comments.content, comments.is_delete, users.username 
+            FROM comments
+            LEFT JOIN users ON comments.owner = users.id
+            WHERE comments.thread = $1 `,
+      values: [threadId],
+    };
+    const result = await this._pool.query(query);
+    return result.rows;
+  }
 }
 module.exports = CommentRepositoryPostgres;

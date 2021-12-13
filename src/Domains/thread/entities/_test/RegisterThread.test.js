@@ -23,7 +23,6 @@ describe('a RegisterThread entities', () => {
     const payload = {
       title: 'abc',
       body: 'abc',
-      owner: 'user-123',
     };
     const { title, body } = new RegisterThread(payload);
     expect(title).toEqual(payload.title);

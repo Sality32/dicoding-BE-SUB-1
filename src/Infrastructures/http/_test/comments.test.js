@@ -1,6 +1,7 @@
 const CommentsTableTestHelper = require('../../../../tests/CommentTableTestHelper');
 const ServerTestHelper = require('../../../../tests/ServerTestHelper');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
+const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const container = require('../../container');
 const pool = require('../../database/postgres/pool');
 const createServer = require('../createServer');
@@ -9,6 +10,7 @@ describe('endpoint /threads/{threadid}/comments', () => {
   afterEach(async () => {
     await ThreadsTableTestHelper.cleanTable();
     await CommentsTableTestHelper.cleanTable();
+    await UsersTableTestHelper.cleanTable();
   });
   afterAll(async () => {
     await pool.end();
@@ -24,6 +26,7 @@ describe('endpoint /threads/{threadid}/comments', () => {
         body: 'INI ADALAH ISI DARI THREAD',
         owner: 'user-123',
       };
+      await UsersTableTestHelper.addUser({ id: 'user-123' });
       await ThreadsTableTestHelper.addThread(thread);
       const accessToken = await ServerTestHelper.getAccessToken();
       const server = await createServer(container);
@@ -53,6 +56,7 @@ describe('endpoint /threads/{threadid}/comments', () => {
         body: 'INI ADALAH ISI DARI THREAD',
         owner: 'user-123',
       };
+      await UsersTableTestHelper.addUser({ id: 'user-123' });
       await ThreadsTableTestHelper.addThread(thread);
       const server = await createServer(container);
       const response = await server.inject({
@@ -90,7 +94,11 @@ describe('endpoint /threads/{threadid}/comments', () => {
     it('should response 400 when bad payload', async () => {
       const accessToken = await ServerTestHelper.getAccessToken();
       const server = await createServer(container);
-      await ThreadsTableTestHelper.addThread({ id: 'thread-2' });
+      await UsersTableTestHelper.addUser({ id: 'user-123' });
+      await ThreadsTableTestHelper.addThread({
+        id: 'thread-2',
+        owner: 'user-123',
+      });
       const response = await server.inject({
         url: '/threads/thread-2/comments',
         method: 'POST',
@@ -109,7 +117,11 @@ describe('endpoint /threads/{threadid}/comments', () => {
       };
       const accessToken = await ServerTestHelper.getAccessToken();
       const server = await createServer(container);
-      await ThreadsTableTestHelper.addThread({ id: 'thread-2' });
+      await UsersTableTestHelper.addUser({ id: 'user-123' });
+      await ThreadsTableTestHelper.addThread({
+        id: 'thread-2',
+        owner: 'user-123',
+      });
       const response = await server.inject({
         url: '/threads/thread-2/comments',
         method: 'POST',
@@ -129,6 +141,7 @@ describe('endpoint /threads/{threadid}/comments', () => {
         thread: 'thread-123',
         comment: 'comment-123',
       };
+      await UsersTableTestHelper.addUser({ id: 'user-123' });
       await ThreadsTableTestHelper.addThread({ id: useCasePayload.thread });
       await CommentsTableTestHelper.addComment({ id: useCasePayload.comment });
       const server = await createServer(container);
@@ -146,6 +159,7 @@ describe('endpoint /threads/{threadid}/comments', () => {
         comment: 'comment-123',
       };
       const accessToken = await ServerTestHelper.getAccessToken();
+      await UsersTableTestHelper.addUser({ id: 'user-123' });
       await ThreadsTableTestHelper.addThread({
         id: useCasePayload.thread,
       });
@@ -171,6 +185,7 @@ describe('endpoint /threads/{threadid}/comments', () => {
         comment: 'comment-123',
       };
       const accessToken = await ServerTestHelper.getAccessToken();
+      await UsersTableTestHelper.addUser({ id: 'user-12' });
       await ThreadsTableTestHelper.addThread({
         id: useCasePayload.thread,
         owner: useCasePayload.owner,
@@ -198,6 +213,7 @@ describe('endpoint /threads/{threadid}/comments', () => {
         comment: 'comment-123',
       };
       const accessToken = await ServerTestHelper.getAccessToken();
+      await UsersTableTestHelper.addUser({ id: 'user-123' });
       await ThreadsTableTestHelper.addThread({
         id: useCasePayload.thread,
         owner: useCasePayload.owner,

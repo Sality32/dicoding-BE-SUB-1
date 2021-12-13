@@ -30,6 +30,7 @@ describe('ThreadRepositoryPostgres', () => {
         fakeIdGenerator
       );
       const owner = 'user-123';
+      await UsersTableTestHelper.addUser({ id: owner });
       await threadRepositoryPostgres.addThread(owner, registerThread);
 
       const threads = await ThreadsTableTestHelper.findThreadById('thread-123');
@@ -48,6 +49,7 @@ describe('ThreadRepositoryPostgres', () => {
         fakeIdGenerator
       );
       const owner = 'user-123';
+      await UsersTableTestHelper.addUser({ id: owner });
       const registeredThread = await threadRepositoryPostgres.addThread(
         owner,
         registerThread
@@ -79,7 +81,7 @@ describe('ThreadRepositoryPostgres', () => {
         body: 'ini body',
         owner: 'user-123',
       };
-
+      await UsersTableTestHelper.addUser({ id: payload.owner });
       await ThreadsTableTestHelper.addThread(payload);
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
@@ -92,7 +94,7 @@ describe('ThreadRepositoryPostgres', () => {
     it('should throw NotFoundError when thread not found', async () => {
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
       await expect(
-        threadRepositoryPostgres.verifyThreadExist('thread-0')
+        threadRepositoryPostgres.getDetailThread('thread-0')
       ).rejects.toThrowError(NotFoundError);
     });
     it('should return object correctly', async () => {
@@ -179,7 +181,7 @@ describe('ThreadRepositoryPostgres', () => {
       await CommentsTableTestHelper.addComment(commentPayload[1]);
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
       const result = await threadRepositoryPostgres.getDetailThread(payload.id);
-      expect(result.thread.id).toStrictEqual(expectedReturnValue.thread.id);
+      expect(result.id).toStrictEqual(expectedReturnValue.thread.id);
     });
   });
 });

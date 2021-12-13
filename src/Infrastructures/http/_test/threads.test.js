@@ -23,7 +23,7 @@ describe('/threads endpoint', () => {
         title: 'Ini adalah title',
         body: 'Ini Adalah Body',
       };
-
+      await UsersTableTestHelper.addUser({ id: 'user-123' });
       const accessToken = await ServerTestHelper.getAccessToken();
       const server = await createServer(container);
 
