@@ -7,7 +7,7 @@ const ThreadsTableTestHelper = {
     title = 'Ini Thread',
     body = 'INI ADALAH ISI DARI THREAD',
     owner = 'user-123',
-    date = new Date().toISOString(),
+    date = '2021-11-11',
   }) {
     const query = {
       text: 'INSERT INTO threads VALUES($1, $2, $3, $4, $5)',

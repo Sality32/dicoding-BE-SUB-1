@@ -32,15 +32,22 @@ describe('CommentRepositoryPostgres', () => {
         content: 'ini content',
       });
       const fakeIdGenerator = () => '123';
+      function fakeDateGenerator() {
+        this.toISOString = () => '2021-11-11';
+      }
       const commentRepositoryPostgres = new CommentRepositoryPostgres(
         pool,
-        fakeIdGenerator
+        fakeIdGenerator,
+        fakeDateGenerator
       );
 
       const registeredComment = await commentRepositoryPostgres.addComment(
         'user-0',
         'thread-123',
         registerComment
+      );
+      const comments = await CommentsTableTestHelper.findCommentById(
+        'comment-123'
       );
       expect(registeredComment).toStrictEqual(
         new RegisteredComment({
@@ -49,12 +56,17 @@ describe('CommentRepositoryPostgres', () => {
           owner: 'user-0',
         })
       );
+      expect(comments).toHaveLength(1);
     });
   });
   describe('verify comment exist function', () => {
     it('should throw error when comment not found', async () => {
       const commentId = 'comment-123';
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(
+        pool,
+        {},
+        {}
+      );
       await expect(
         commentRepositoryPostgres.verifyCommentExist(commentId)
       ).rejects.toThrowError(NotFoundError);
@@ -76,7 +88,11 @@ describe('CommentRepositoryPostgres', () => {
         thread: payload.threadId,
         owner: payload.userId,
       });
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(
+        pool,
+        {},
+        {}
+      );
       await expect(
         commentRepositoryPostgres.verifyCommentExist(payload.commentId)
       ).resolves.not.toThrowError(NotFoundError);
@@ -106,7 +122,11 @@ describe('CommentRepositoryPostgres', () => {
         thread: payload.threadId,
         owner: payload.userId,
       });
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(
+        pool,
+        {},
+        {}
+      );
       const commentResult =
         await commentRepositoryPostgres.getCommentByThreadId(payload.threadId);
       expect(commentResult.length).toEqual(2);
@@ -130,7 +150,11 @@ describe('CommentRepositoryPostgres', () => {
         thread: payload.threadId,
         owner: payload.userId,
       });
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(
+        pool,
+        {},
+        {}
+      );
       await expect(
         commentRepositoryPostgres.deleteComment(
           payload.commentId,
@@ -156,7 +180,11 @@ describe('CommentRepositoryPostgres', () => {
         thread: payload.threadId,
         owner: payload.userId,
       });
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(
+        pool,
+        {},
+        {}
+      );
 
       await commentRepositoryPostgres.deleteComment(
         payload.commentId,

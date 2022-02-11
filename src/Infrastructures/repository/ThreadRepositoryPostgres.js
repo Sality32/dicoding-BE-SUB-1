@@ -3,16 +3,17 @@ const RegisteredThread = require('../../Domains/thread/entities/RegisteredThread
 const ThreadRepository = require('../../Domains/thread/ThreadRepository');
 
 class ThreadRepositoryPostgres extends ThreadRepository {
-  constructor(pool, idGenerator) {
+  constructor(pool, idGenerator, dateGenerator) {
     super();
     this._pool = pool;
     this._idGenerator = idGenerator;
+    this._dateGenerator = dateGenerator;
   }
 
   async addThread(owner, registerThread) {
     const { title, body } = registerThread;
     const id = `thread-${this._idGenerator()}`;
-    const date = new Date(Date.now()).toISOString();
+    const date = new this._dateGenerator().toISOString();
     const query = {
       text: 'INSERT INTO threads VALUES($1, $2, $3, $4, $5) RETURNING id, title, body, "owner"',
       values: [id, title, body, owner, date],

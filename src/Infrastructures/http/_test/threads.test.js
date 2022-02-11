@@ -94,7 +94,8 @@ describe('/threads endpoint', () => {
       expect(responseJson.status).toEqual('fail');
     });
     it('should return 200 when thread exist', async () => {
-      const datetime = new Date().toISOString();
+      const tzoffset = new Date().getTimezoneOffset() * 60000;
+      const datetime = new Date(Date.now() - tzoffset).toISOString();
       const payload = {
         id: 'thread-123',
         title: ' ini tittle',
@@ -132,6 +133,34 @@ describe('/threads endpoint', () => {
           date: datetime,
         },
       ];
+      const expectedComments = [
+        {
+          id: 'comment-123',
+          username: 'jhondoe',
+          content: 'sebuah comment',
+          date: datetime,
+        },
+        {
+          id: 'comment-321',
+          username: 'dicoding',
+          content: '**komentar telah dihapus**',
+          date: datetime,
+        },
+      ];
+      const expectedData = {
+        id: 'thread-123',
+        title: ' ini tittle',
+        body: 'ini body',
+        date: datetime,
+      };
+      const expectedDetailThread = {
+        ...expectedData,
+        username:
+          payload.username == userPayload[0].id
+            ? userPayload[0].username
+            : userPayload[1].username,
+        comments: expectedComments,
+      };
       await UsersTableTestHelper.addUser(userPayload[0]);
       await UsersTableTestHelper.addUser(userPayload[1]);
       await ThreadsTableTestHelper.addThread(payload);
@@ -148,8 +177,7 @@ describe('/threads endpoint', () => {
       expect(response.statusCode).toEqual(200);
       expect(responseJson.status).toEqual('success');
       expect(responseJson.data.thread).toBeDefined();
-      expect(responseJson.data.thread.id).toEqual(payload.id);
-      expect(responseJson.data.thread.title).toEqual(payload.title);
+      expect(responseJson.data.thread).toEqual(expectedDetailThread);
     });
   });
 });

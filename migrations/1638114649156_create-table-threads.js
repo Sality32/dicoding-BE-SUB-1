@@ -18,10 +18,10 @@ exports.up = (pgm) => {
       type: 'VARCHAR(50)',
       notNull: true,
       references: '"users"',
-      onDelete: 'cascade'
+      onDelete: 'cascade',
     },
     date: {
-      type: 'TIMESTAMP WITHOUT TIME ZONE',
+      type: 'TEXT',
       notNull: true,
     },
   });
