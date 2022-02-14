@@ -52,21 +52,6 @@ describe('GetThreadUseCase', () => {
         },
       ],
     };
-    const { is_delete: is_deletedComment1 } = comment[0];
-    const { is_delete: is_deletedComment2 } = comment[1];
-    const expectedComment1 = {
-      id: 'comment-123',
-      date: '2021-11-11',
-      content: is_deletedComment1 ? '**komentar telah dihapus**' : 'content',
-      username: 'test1',
-    };
-    const expectedComment2 = {
-      id: 'comment-124',
-      date: '2021-11-31',
-      content: is_deletedComment2 ? '**komentar telah dihapus**' : 'content',
-      username: 'test2',
-    };
-    const expectedThread = { thread: thread };
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     mockThreadRepository.verifyThreadExist = jest
