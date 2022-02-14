@@ -83,9 +83,6 @@ describe('GetThreadUseCase', () => {
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
     });
-    getThreadUseCase._checkIsDeletedComments = jest
-      .fn()
-      .mockImplementation(() => [expectedComment1, expectedComment2]);
     const useCaseResult = await getThreadUseCase.execute(useCasePayload);
 
     expect(mockThreadRepository.verifyThreadExist).toBeCalledWith(

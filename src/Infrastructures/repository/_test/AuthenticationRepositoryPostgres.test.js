@@ -12,7 +12,7 @@ describe('AuthenticationRepository postgres', () => {
     await pool.end();
   });
 
-  describe('addToken function', () => {
+  describe('add Token function', () => {
     it('should add token to database', async () => {
       // Arrange
       const authenticationRepository = new AuthenticationRepositoryPostgres(pool);

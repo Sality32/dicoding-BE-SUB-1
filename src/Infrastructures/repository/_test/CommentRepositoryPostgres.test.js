@@ -106,6 +106,22 @@ describe('CommentRepositoryPostgres', () => {
         commentId: 'comment-123',
         commentId2: 'comment-124',
       };
+      const expected = [
+        {
+          id: 'comment-123',
+          content: 'ini content',
+          is_delete: false,
+          username: 'dicoding',
+          date: '2021-11-11',
+        },
+        {
+          id: 'comment-124',
+          content: 'ini content',
+          is_delete: false,
+          username: 'dicoding',
+          date: '2021-11-11',
+        },
+      ];
       await UsersTableTestHelper.addUser({ id: payload.userId });
       await ThreadsTableTestHelper.addThread({
         id: payload.threadId,
@@ -130,6 +146,7 @@ describe('CommentRepositoryPostgres', () => {
       const commentResult =
         await commentRepositoryPostgres.getCommentByThreadId(payload.threadId);
       expect(commentResult.length).toEqual(2);
+      expect(commentResult).toEqual(expected);
     });
   });
   describe('delete comment function', () => {
