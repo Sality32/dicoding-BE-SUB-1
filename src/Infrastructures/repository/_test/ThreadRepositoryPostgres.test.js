@@ -23,11 +23,14 @@ describe('ThreadRepositoryPostgres', () => {
         title: 'Ini adalah Thread',
         body: 'Ini adalah isi dari Body',
       });
-
+      function fakeDateGenerator() {
+        this.toISOString = () => '2021-11-11';
+      }
       const fakeIdGenerator = () => '123';
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(
         pool,
-        fakeIdGenerator
+        fakeIdGenerator,
+        fakeDateGenerator
       );
       const owner = 'user-123';
       await UsersTableTestHelper.addUser({ id: owner });
@@ -43,10 +46,14 @@ describe('ThreadRepositoryPostgres', () => {
         body: 'Ini adalah Body Thread',
       });
 
+      function fakeDateGenerator() {
+        this.toISOString = () => '2021-11-11';
+      }
       const fakeIdGenerator = () => '123';
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(
         pool,
-        fakeIdGenerator
+        fakeIdGenerator,
+        fakeDateGenerator
       );
       const owner = 'user-123';
       await UsersTableTestHelper.addUser({ id: owner });
@@ -54,7 +61,7 @@ describe('ThreadRepositoryPostgres', () => {
         owner,
         registerThread
       );
-
+      const threads = await ThreadsTableTestHelper.findThreadById('thread-123');
       expect(registeredThread).toStrictEqual(
         new RegisteredThread({
           id: 'thread-123',
@@ -63,12 +70,17 @@ describe('ThreadRepositoryPostgres', () => {
           owner: 'user-123',
         })
       );
+      expect(threads).toHaveLength(1);
     });
   });
 
   describe('verify Thread function', () => {
     it('should throw NotFoundError when thread not found', async () => {
-      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(
+        pool,
+        {},
+        {}
+      );
       await expect(
         threadRepositoryPostgres.verifyThreadExist('thread-0')
       ).rejects.toThrowError(NotFoundError);
@@ -83,7 +95,11 @@ describe('ThreadRepositoryPostgres', () => {
       };
       await UsersTableTestHelper.addUser({ id: payload.owner });
       await ThreadsTableTestHelper.addThread(payload);
-      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(
+        pool,
+        {},
+        {}
+      );
 
       await expect(
         threadRepositoryPostgres.verifyThreadExist('thread-1234')
@@ -92,7 +108,11 @@ describe('ThreadRepositoryPostgres', () => {
   });
   describe('get detail Thread function', () => {
     it('should throw NotFoundError when thread not found', async () => {
-      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(
+        pool,
+        {},
+        {}
+      );
       await expect(
         threadRepositoryPostgres.getDetailThread('thread-0')
       ).rejects.toThrowError(NotFoundError);
@@ -107,35 +127,10 @@ describe('ThreadRepositoryPostgres', () => {
         date: datetime,
       };
 
-      const userPayload = [
-        {
-          id: 'user-123',
-          username: 'jhondoe',
-        },
-        {
-          id: 'user-321',
-          username: 'dicoding',
-        },
-      ];
-
-      const commentPayload = [
-        {
-          id: 'comment-123',
-          owner: 'user-123',
-          content: 'sebuah comment',
-          thread: 'thread-123',
-          isdelete: false,
-          date: datetime,
-        },
-        {
-          id: 'comment-321',
-          owner: 'user-321',
-          thread: 'thread-123',
-          content: 'sebuah comment',
-          isdelete: true,
-          date: datetime,
-        },
-      ];
+      const userPayload = {
+        id: 'user-321',
+        username: 'dicoding',
+      };
 
       const expectedReturnValue = {
         thread: {
@@ -143,45 +138,18 @@ describe('ThreadRepositoryPostgres', () => {
           title: payload.title,
           body: payload.body,
           date: payload.date,
-          username:
-            payload.owner == userPayload[0].id
-              ? userPayload[0].username
-              : userPayload[1].username,
-
-          comments: [
-            {
-              id: commentPayload[0].id,
-              username:
-                commentPayload[0].owner == userPayload[0].id
-                  ? userPayload[0].username
-                  : userPayload[1].username,
-              date: commentPayload[0].date,
-              content: commentPayload[0].isdelete
-                ? '**komentar telah dihapus**'
-                : commentPayload[0].content,
-            },
-            {
-              id: commentPayload[1].id,
-              username:
-                commentPayload[1].owner == userPayload[0].id
-                  ? userPayload[0].username
-                  : userPayload[1].username,
-              date: commentPayload[1].date,
-              content: commentPayload[1].isdelete
-                ? '**komentar telah dihapus**'
-                : commentPayload[1].content,
-            },
-          ],
+          username: userPayload.username,
         },
       };
-      await UsersTableTestHelper.addUser(userPayload[0]);
-      await UsersTableTestHelper.addUser(userPayload[1]);
+      await UsersTableTestHelper.addUser(userPayload);
       await ThreadsTableTestHelper.addThread(payload);
-      await CommentsTableTestHelper.addComment(commentPayload[0]);
-      await CommentsTableTestHelper.addComment(commentPayload[1]);
-      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(
+        pool,
+        {},
+        {}
+      );
       const result = await threadRepositoryPostgres.getDetailThread(payload.id);
-      expect(result.id).toStrictEqual(expectedReturnValue.thread.id);
+      expect(result).toStrictEqual(expectedReturnValue.thread);
     });
   });
 });

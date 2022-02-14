@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 
 const { createContainer } = require('instances-container');
-
+const date = Date;
 // external agency
 const { nanoid } = require('nanoid');
 const bcrypt = require('bcrypt');
@@ -95,6 +95,9 @@ container.register([
         {
           concrete: nanoid,
         },
+        {
+          concrete: date,
+        },
       ],
     },
   },
@@ -108,6 +111,9 @@ container.register([
         },
         {
           concrete: nanoid,
+        },
+        {
+          concrete: date,
         },
       ],
     },

@@ -25,7 +25,7 @@ exports.up = (pgm) => {
       onDelete: 'cascade',
     },
     date: {
-      type: 'TIMESTAMP WITHOUT TIME ZONE',
+      type: 'TEXT',
       notNull: true,
     },
     is_delete: {
