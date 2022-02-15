@@ -74,6 +74,9 @@ describe('GetThreadUseCase', () => {
       useCasePayload
     );
     expect(mockThreadRepository.getDetailThread).toBeCalledWith(useCasePayload);
+    expect(mockCommentRepository.getCommentByThreadId).toBeCalledWith(
+      useCasePayload
+    );
     expect(useCaseResult).toEqual(expectedResult);
   });
 });
